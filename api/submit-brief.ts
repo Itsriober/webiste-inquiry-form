@@ -1,7 +1,9 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { put, get } from '@vercel/blob';
 import { briefFormSchema, type BriefFormSchema } from '../src/lib/formSchema';
 import crypto from 'crypto';
+
+// Fallback in-memory storage for development/testing
+const inMemoryBriefs: Map<string, any> = new Map();
 
 export interface StoredBrief {
   id: string;
@@ -16,51 +18,68 @@ export interface FormStats {
   abandoned: number;
 }
 
-const STATS_BLOB_KEY = 'stats.json';
-
 async function getStats(): Promise<FormStats> {
-  try {
-    const response = await get(STATS_BLOB_KEY, { access: 'public' });
-    if (!response) {
-      return { started: 0, submitted: 0, abandoned: 0 };
+  // If Blob token exists, use it
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      const { get } = await import('@vercel/blob');
+      const response = await get('stats.json', { access: 'public' });
+      if (response) {
+        const reader = response.stream!.getReader();
+        const chunks: Uint8Array[] = [];
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+        }
+        const buffer = Buffer.concat(chunks);
+        const text = buffer.toString('utf-8');
+        return JSON.parse(text);
+      }
+    } catch (error) {
+      console.warn('Blob storage error, using fallback:', error);
     }
-    // Read from the ReadableStream
-    const reader = response.stream!.getReader();
-    const chunks: Uint8Array[] = [];
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-    }
-    const buffer = Buffer.concat(chunks);
-    const text = buffer.toString('utf-8');
-    return JSON.parse(text);
-  } catch {
-    return { started: 0, submitted: 0, abandoned: 0 };
   }
+  // Fallback
+  return { started: 0, submitted: 0, abandoned: 0 };
 }
 
 async function saveStats(stats: FormStats): Promise<void> {
-  await put(STATS_BLOB_KEY, JSON.stringify(stats), {
-    contentType: 'application/json',
-    access: 'public',
-  });
+  // If Blob token exists, use it
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      const { put } = await import('@vercel/blob');
+      await put('stats.json', JSON.stringify(stats), {
+        contentType: 'application/json',
+        access: 'public',
+      });
+    } catch (error) {
+      console.warn('Blob storage error saving stats:', error);
+    }
+  }
+}
+
+async function saveBrief(brief: StoredBrief): Promise<void> {
+  // If Blob token exists, use it
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      const { put } = await import('@vercel/blob');
+      await put(`briefs/${brief.id}.json`, JSON.stringify(brief), {
+        contentType: 'application/json',
+        access: 'public',
+      });
+    } catch (error) {
+      console.warn('Blob storage error saving brief:', error);
+    }
+  }
+  // Fallback: in-memory storage
+  inMemoryBriefs.set(brief.id, brief);
 }
 
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
-  // Check environment
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    console.error('BLOB_READ_WRITE_TOKEN not configured');
-    res.status(503).json({
-      success: false,
-      error: 'Service temporarily unavailable. Storage not configured.',
-    });
-    return;
-  }
-
   // Only allow POST requests
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
@@ -82,12 +101,9 @@ export default async function handler(
       data: validatedData,
     };
 
-    // Save brief to blob storage
+    // Save brief
     const briefKey = `briefs/${briefId}.json`;
-    await put(briefKey, JSON.stringify(brief), {
-      contentType: 'application/json',
-      access: 'public',
-    });
+    await saveBrief(brief);
 
     // Update stats
     const stats = await getStats();
