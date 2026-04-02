@@ -66,7 +66,7 @@ export default async function handler(
   try {
     // Get PIN from query parameter or header
     const pinParam = (req.query.pin as string) || req.headers['x-dashboard-pin'];
-    const correctPin = process.env.DASHBOARD_PIN_SECRET;
+    const correctPin = process.env.DASHBOARD_PIN_SECRET || process.env.VITE_DASHBOARD_PIN;
 
     // Validate PIN
     if (!correctPin) {

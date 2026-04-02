@@ -94,10 +94,15 @@ export default function BriefForm() {
       });
 
       if (!submitResponse.ok) {
-        const errorData = await submitResponse.json();
-        throw new Error(
-          errorData.error || 'Failed to submit brief'
-        );
+        let errorMessage = 'Failed to submit brief';
+        try {
+          const errorData = await submitResponse.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          // If response is not JSON (e.g. HTML 404 page)
+          errorMessage = `Network Error (${submitResponse.status}): The server returned an invalid response.`;
+        }
+        throw new Error(errorMessage);
       }
 
       const result = await submitResponse.json();

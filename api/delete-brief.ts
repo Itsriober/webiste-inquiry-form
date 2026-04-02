@@ -1,6 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { del, get } from '@vercel/blob';
-import crypto from 'crypto';
+import { del, get, put } from '@vercel/blob';
 
 async function getStats() {
   try {
@@ -8,7 +7,7 @@ async function getStats() {
     if (!response) {
       return { started: 0, submitted: 0, abandoned: 0 };
     }
-    // Read from the ReadableStream
+    // Read from the ReadableStream correctly
     const reader = response.stream!.getReader();
     const chunks: Uint8Array[] = [];
     while (true) {
@@ -25,7 +24,6 @@ async function getStats() {
 }
 
 async function saveStats(stats: any) {
-  const { put } = await import('@vercel/blob');
   await put('stats.json', JSON.stringify(stats), {
     contentType: 'application/json',
     access: 'public',
@@ -53,10 +51,16 @@ export default async function handler(
 
   try {
     const pin = (req.query.pin as string) || req.headers['x-dashboard-pin'];
-    const correctPin = process.env.DASHBOARD_PIN_SECRET;
+    const correctPin = process.env.DASHBOARD_PIN_SECRET || process.env.VITE_DASHBOARD_PIN;
+
+    if (!correctPin) {
+      console.error('DASHBOARD_PIN_SECRET not configured');
+      res.status(500).json({ error: 'Server configuration error' });
+      return;
+    }
 
     if (!pin || pin !== correctPin) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized: Invalid PIN' });
       return;
     }
 

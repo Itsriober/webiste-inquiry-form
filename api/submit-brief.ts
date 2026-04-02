@@ -1,15 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
+import { put, get } from '@vercel/blob';
 import { briefFormSchema, type BriefFormSchema } from '../src/lib/formSchema';
 import crypto from 'crypto';
-
-// Try to import blob, but fallback if not available
-let blobModule: any = null;
-try {
-  // This will work if token is configured
-  blobModule = require('@vercel/blob');
-} catch (e) {
-  // Fallback for when blob isn't configured
-}
 
 export interface StoredBrief {
   id: string;
@@ -25,53 +17,46 @@ export interface FormStats {
 }
 
 async function getStats(): Promise<FormStats> {
-  // If Blob module is available, use it
-  if (blobModule?.get) {
-    try {
-      const response = await blobModule.get('stats.json', { access: 'public' });
-      if (response) {
-        const reader = response.stream!.getReader();
-        const chunks: Uint8Array[] = [];
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          chunks.push(value);
-        }
-        const buffer = Buffer.concat(chunks);
-        const text = buffer.toString('utf-8');
-        return JSON.parse(text);
+  try {
+    const response = await get('stats.json', { access: 'public' });
+    if (response) {
+      // Read from the ReadableStream correctly for Vercel environments
+      const reader = response.stream!.getReader();
+      const chunks: Uint8Array[] = [];
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
       }
-    } catch (error) {
-      console.warn('Blob storage error, using fallback:', error);
+      const buffer = Buffer.concat(chunks);
+      const text = buffer.toString('utf-8');
+      return JSON.parse(text);
     }
+  } catch (error) {
+    console.warn('Blob storage error, using fallback:', error);
   }
-  // Fallback
   return { started: 0, submitted: 0, abandoned: 0 };
 }
 
 async function saveStats(stats: FormStats): Promise<void> {
-  if (blobModule?.put) {
-    try {
-      await blobModule.put('stats.json', JSON.stringify(stats), {
-        contentType: 'application/json',
-        access: 'public',
-      });
-    } catch (error) {
-      console.warn('Blob storage error saving stats:', error);
-    }
+  try {
+    await put('stats.json', JSON.stringify(stats), {
+      contentType: 'application/json',
+      access: 'public',
+    });
+  } catch (error) {
+    console.warn('Blob storage error saving stats:', error);
   }
 }
 
 async function saveBrief(brief: StoredBrief): Promise<void> {
-  if (blobModule?.put) {
-    try {
-      await blobModule.put(`briefs/${brief.id}.json`, JSON.stringify(brief), {
-        contentType: 'application/json',
-        access: 'public',
-      });
-    } catch (error) {
-      console.warn('Blob storage error saving brief:', error);
-    }
+  try {
+    await put(`briefs/${brief.id}.json`, JSON.stringify(brief), {
+      contentType: 'application/json',
+      access: 'public',
+    });
+  } catch (error) {
+    console.warn('Blob storage error saving brief:', error);
   }
 }
 
