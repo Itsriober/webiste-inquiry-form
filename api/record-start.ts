@@ -1,5 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { get, put } from '@vercel/blob';
+import crypto from 'crypto';
 
 export default async function handler(
   req: VercelRequest,

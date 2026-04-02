@@ -1,6 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { list, get } from '@vercel/blob';
 import type { BriefFormSchema } from '../src/lib/formSchema';
+import crypto from 'crypto';
 
 export interface StoredBrief {
   id: string;

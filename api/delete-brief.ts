@@ -1,5 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { del, get } from '@vercel/blob';
+import crypto from 'crypto';
 
 async function getStats() {
   try {
