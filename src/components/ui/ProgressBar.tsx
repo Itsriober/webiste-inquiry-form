@@ -9,12 +9,12 @@ export default function ProgressBar({ current, total }: ProgressBarProps) {
   const title = STEP_TITLES[current] || '';
 
   return (
-    <div className="w-full mb-8">
-      <div className="flex justify-between items-baseline mb-3">
-        <span className="text-sm font-body text-text-secondary">
+    <div className="w-full mb-6 sm:mb-8">
+      <div className="flex justify-between items-baseline mb-2 sm:mb-3 gap-4">
+        <span className="text-xs sm:text-sm font-body font-semibold text-text-secondary uppercase tracking-wider">
           Step {current} of {total}
         </span>
-        <span className="text-sm font-body text-text-muted">{title}</span>
+        <span className="text-xs sm:text-sm font-body text-text-muted text-right">{title}</span>
       </div>
       <div className="flex gap-1">
         {Array.from({ length: total }, (_, i) => (

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { Lock, Search, Trash2, Globe, Briefcase, FileText, LayoutTemplate, Zap, ExternalLink } from 'lucide-react';
 
-import { getBriefs, getStats, deleteBrief, clearAllData, type StoredBrief, type FormStats } from '../lib/storage';
+import type { StoredBrief, FormStats } from '../lib/storage';
 
 export default function Dashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -22,9 +22,24 @@ export default function Dashboard() {
     }
   }, [isAuthenticated]);
 
-  const loadData = () => {
-    setBriefs(getBriefs());
-    setStats(getStats());
+  const loadData = async () => {
+    try {
+      const response = await fetch(`/api/get-briefs?pin=${correctPin}`);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch briefs');
+      }
+
+      const result = await response.json();
+      setBriefs(result.briefs || []);
+      setStats(result.stats || { started: 0, submitted: 0, abandoned: 0 });
+    } catch (err) {
+      console.error('Error loading dashboard data:', err);
+      setError(true);
+      // Fallback to empty state
+      setBriefs([]);
+      setStats({ started: 0, submitted: 0, abandoned: 0 });
+    }
   };
 
   const handleLogin = (e: React.FormEvent) => {
@@ -38,22 +53,34 @@ export default function Dashboard() {
     }
   };
 
-  const handleDelete = (id: string, e?: React.MouseEvent) => {
+  const handleDelete = async (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     if (window.confirm('Are you sure you want to delete this brief?')) {
-      deleteBrief(id);
-      loadData();
-      if (selectedBrief?.id === id) {
-        setSelectedBrief(null);
+      try {
+        const response = await fetch(
+          `/api/delete-brief?briefId=${id}&pin=${correctPin}`,
+          { method: 'DELETE' }
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to delete brief');
+        }
+
+        // Reload data after deletion
+        await loadData();
+        if (selectedBrief?.id === id) {
+          setSelectedBrief(null);
+        }
+      } catch (err) {
+        console.error('Error deleting brief:', err);
+        alert('Failed to delete brief. Please try again.');
       }
     }
   };
 
   const handleClearAll = () => {
     if (window.confirm('WARNING: Are you sure you want to delete ALL data? This cannot be undone.')) {
-      clearAllData();
-      loadData();
-      setSelectedBrief(null);
+      alert('Clear all functionality would require a dedicated endpoint. Please delete briefs individually or contact support.');
     }
   };
 

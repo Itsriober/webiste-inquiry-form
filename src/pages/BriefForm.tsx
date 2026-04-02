@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { BriefFormData } from '../types/brief';
 import { briefFormSchema, STEP_FIELDS, type BriefFormSchema } from '../lib/formSchema';
 import { useMultiStep } from '../hooks/useMultiStep';
-import { saveBrief, recordStart } from '../lib/storage';
 import { sendBriefEmail } from '../lib/emailjs';
 
 import ProgressBar from '../components/ui/ProgressBar';
@@ -28,8 +27,16 @@ export default function BriefForm() {
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
-    recordStart();
+    // Record form start on API
+    fetch('/api/record-start', { method: 'POST' }).catch((error) => {
+      console.warn('Warning: Could not record form start:', error);
+    });
   }, []);
+
+  // Scroll to top when step changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStep]);
 
   const {
     register,
@@ -77,12 +84,41 @@ export default function BriefForm() {
     setSubmitError(null);
 
     try {
-      saveBrief(data);
-      await sendBriefEmail(data);
+      // Submit to API endpoint
+      const submitResponse = await fetch('/api/submit-brief', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!submitResponse.ok) {
+        const errorData = await submitResponse.json();
+        throw new Error(
+          errorData.error || 'Failed to submit brief'
+        );
+      }
+
+      const result = await submitResponse.json();
+      console.log('✓ Brief submitted successfully:', result.briefId);
+
+      // Try to send email notification
+      try {
+        await sendBriefEmail(data);
+        console.log('✓ Email notification sent');
+      } catch (emailError) {
+        console.warn('⚠ Email notification failed but brief was saved:', emailError);
+        // Don't fail submission if email fails - brief is already saved on server
+      }
+
       navigate('/thank-you', { state: { data } });
-    } catch {
+    } catch (error) {
+      console.error('✗ Error submitting brief:', error);
       setSubmitError(
-        'Something went wrong sending your brief. Please try again or contact us directly.'
+        error instanceof Error
+          ? error.message
+          : 'Something went wrong saving your brief. Please try again or contact us directly.'
       );
     } finally {
       setIsSubmitting(false);
@@ -114,7 +150,7 @@ export default function BriefForm() {
 
   return (
     <div className="min-h-screen pt-14">
-      <div className="max-w-2xl mx-auto px-6 py-10">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <ProgressBar current={currentStep} total={TOTAL_STEPS} />
 
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -123,22 +159,23 @@ export default function BriefForm() {
           </StepWrapper>
 
           {/* Navigation */}
-          <div className="flex justify-between items-center mt-10 pt-6 border-t border-surface-border">
+          <div className="flex justify-between items-center gap-3 mt-8 sm:mt-10 pt-6 border-t border-surface-border">
             {!isFirst ? (
               <button
                 type="button"
                 onClick={back}
                 className="
-                  px-6 py-3 text-sm font-body text-text-secondary
+                  px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-body text-text-secondary
                   border border-surface-border rounded-lg cursor-pointer
                   transition-colors duration-150
                   hover:border-text-muted hover:text-text-primary
+                  min-h-[44px] sm:min-h-auto flex items-center
                 "
               >
                 ← Back
               </button>
             ) : (
-              <div />
+              <div className="flex-1" />
             )}
 
             {isLast ? (
@@ -146,12 +183,13 @@ export default function BriefForm() {
                 type="submit"
                 disabled={isSubmitting}
                 className="
-                  px-8 py-3 text-sm font-body font-medium
+                  px-6 sm:px-8 py-2.5 sm:py-3 text-xs sm:text-sm font-body font-medium
                   bg-brand text-surface rounded-lg cursor-pointer
                   transition-all duration-200
                   hover:bg-brand-dark
                   disabled:opacity-50 disabled:cursor-not-allowed
-                  flex items-center gap-2
+                  flex items-center justify-center gap-2
+                  min-h-[44px] sm:min-h-auto flex-1 sm:flex-none
                 "
               >
                 {isSubmitting ? (
@@ -186,10 +224,11 @@ export default function BriefForm() {
                 type="button"
                 onClick={handleNext}
                 className="
-                  px-8 py-3 text-sm font-body font-medium
+                  px-6 sm:px-8 py-2.5 sm:py-3 text-xs sm:text-sm font-body font-medium
                   bg-brand text-surface rounded-lg cursor-pointer
                   transition-all duration-200
                   hover:bg-brand-dark
+                  min-h-[44px] sm:min-h-auto flex-1 sm:flex-none
                 "
               >
                 Next →

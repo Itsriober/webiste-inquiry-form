@@ -9,10 +9,10 @@ interface StepProps {
 
 export default function Step7_Anything({ register, errors }: StepProps) {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div>
-        <h2 className="font-display text-2xl mb-2">Almost done</h2>
-        <p className="text-sm text-text-secondary mb-5">
+        <h2 className="font-display text-xl sm:text-2xl mb-2 font-bold">Almost done</h2>
+        <p className="text-xs sm:text-sm text-text-secondary mb-4 sm:mb-5 leading-relaxed">
           Anything else you'd like us to know? Then leave your details so we can get back to you.
         </p>
       </div>
@@ -24,14 +24,14 @@ export default function Step7_Anything({ register, errors }: StepProps) {
       />
 
       {/* Visual separator */}
-      <div className="border-t border-surface-border pt-8">
-        <h3 className="font-display text-xl mb-6">Your details</h3>
+      <div className="border-t border-surface-border pt-6 sm:pt-8">
+        <h3 className="font-display text-lg sm:text-xl mb-4 sm:mb-6 font-bold">Your details</h3>
 
-        <div className="space-y-4">
+        <div className="space-y-4 sm:space-y-5">
           <div>
             <label
               htmlFor="clientName"
-              className="block text-sm font-body text-text-secondary mb-2"
+              className="block text-xs sm:text-sm font-body font-semibold text-text-secondary mb-2 uppercase tracking-wide"
             >
               Name <span className="text-brand">*</span>
             </label>
@@ -39,9 +39,10 @@ export default function Step7_Anything({ register, errors }: StepProps) {
               id="clientName"
               type="text"
               className={`
-                w-full px-4 py-3 rounded-lg bg-surface-card border font-body text-text-primary text-sm
+                w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg bg-surface-card border font-body text-text-primary text-xs sm:text-sm
                 placeholder:text-text-muted transition-colors duration-150
                 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand
+                min-h-[44px] sm:min-h-auto
                 ${errors.clientName ? 'border-error' : 'border-surface-border'}
               `}
               placeholder="Jane Doe"
@@ -58,14 +59,14 @@ export default function Step7_Anything({ register, errors }: StepProps) {
           <div>
             <label
               htmlFor="clientCompany"
-              className="block text-sm font-body text-text-secondary mb-2"
+              className="block text-xs sm:text-sm font-body font-semibold text-text-secondary mb-2 uppercase tracking-wide"
             >
               Company
             </label>
             <input
               id="clientCompany"
               type="text"
-              className="w-full px-4 py-3 rounded-lg bg-surface-card border border-surface-border font-body text-text-primary text-sm placeholder:text-text-muted transition-colors duration-150 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg bg-surface-card border border-surface-border font-body text-text-primary text-xs sm:text-sm placeholder:text-text-muted transition-colors duration-150 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand min-h-[44px] sm:min-h-auto"
               placeholder="Acme Ltd"
               {...register('clientCompany')}
             />
@@ -74,7 +75,7 @@ export default function Step7_Anything({ register, errors }: StepProps) {
           <div>
             <label
               htmlFor="clientEmail"
-              className="block text-sm font-body text-text-secondary mb-2"
+              className="block text-xs sm:text-sm font-body font-semibold text-text-secondary mb-2 uppercase tracking-wide"
             >
               Email <span className="text-brand">*</span>
             </label>
@@ -82,9 +83,10 @@ export default function Step7_Anything({ register, errors }: StepProps) {
               id="clientEmail"
               type="email"
               className={`
-                w-full px-4 py-3 rounded-lg bg-surface-card border font-body text-text-primary text-sm
+                w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg bg-surface-card border font-body text-text-primary text-xs sm:text-sm
                 placeholder:text-text-muted transition-colors duration-150
                 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand
+                min-h-[44px] sm:min-h-auto
                 ${errors.clientEmail ? 'border-error' : 'border-surface-border'}
               `}
               placeholder="jane@example.com"
@@ -101,14 +103,14 @@ export default function Step7_Anything({ register, errors }: StepProps) {
           <div>
             <label
               htmlFor="clientPhone"
-              className="block text-sm font-body text-text-secondary mb-2"
+              className="block text-xs sm:text-sm font-body font-semibold text-text-secondary mb-2 uppercase tracking-wide"
             >
               Phone
             </label>
             <input
               id="clientPhone"
               type="tel"
-              className="w-full px-4 py-3 rounded-lg bg-surface-card border border-surface-border font-body text-text-primary text-sm placeholder:text-text-muted transition-colors duration-150 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg bg-surface-card border border-surface-border font-body text-text-primary text-xs sm:text-sm placeholder:text-text-muted transition-colors duration-150 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand min-h-[44px] sm:min-h-auto"
               placeholder="+254 700 000 000"
               {...register('clientPhone')}
             />

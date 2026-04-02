@@ -15,16 +15,16 @@ export default function Step1_BusinessInfo({ setValue, watch, errors }: StepProp
   const hasExistingSite = watch('hasExistingSite') || '';
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div>
-        <h2 className="font-display text-2xl mb-2">Tell us about your business</h2>
-        <p className="text-sm text-text-secondary mb-5">
+        <h2 className="font-display text-xl sm:text-2xl mb-2 font-bold">Tell us about your business</h2>
+        <p className="text-xs sm:text-sm text-text-secondary mb-4 sm:mb-5 leading-relaxed">
           What type of business are you building a website for?
         </p>
       </div>
 
       <div>
-        <label className="block text-sm font-body text-text-secondary mb-3">
+        <label className="block text-xs sm:text-sm font-body font-semibold text-text-secondary mb-3 uppercase tracking-wide">
           Business type
         </label>
         <ExpandableChipGroup
@@ -45,7 +45,7 @@ export default function Step1_BusinessInfo({ setValue, watch, errors }: StepProp
       </div>
 
       <div>
-        <label className="block text-sm font-body text-text-secondary mb-3">
+        <label className="block text-xs sm:text-sm font-body font-semibold text-text-secondary mb-3 uppercase tracking-wide">
           Do you have an existing website?
         </label>
         <ExpandableChipGroup

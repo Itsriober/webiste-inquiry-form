@@ -29,16 +29,16 @@ export default function Step6_Timeline({ setValue, watch, errors }: StepProps) {
   const budgetRange = watch('budgetRange') || '';
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div>
-        <h2 className="font-display text-2xl mb-2">Timeline & budget</h2>
-        <p className="text-sm text-text-secondary mb-5">
+        <h2 className="font-display text-xl sm:text-2xl mb-2 font-bold">Timeline & budget</h2>
+        <p className="text-xs sm:text-sm text-text-secondary mb-4 sm:mb-5 leading-relaxed">
           When do you need it, and what's your budget?
         </p>
       </div>
 
       <div>
-        <label className="block text-sm font-body text-text-secondary mb-3">
+        <label className="block text-xs sm:text-sm font-body font-semibold text-text-secondary mb-3 uppercase tracking-wide">
           Ideal timeline
         </label>
         <RadioChipGroup
@@ -55,7 +55,7 @@ export default function Step6_Timeline({ setValue, watch, errors }: StepProps) {
       </div>
 
       <div>
-        <label className="block text-sm font-body text-text-secondary mb-3">
+        <label className="block text-xs sm:text-sm font-body font-semibold text-text-secondary mb-3 uppercase tracking-wide">
           Budget range
         </label>
         <RadioChipGroup

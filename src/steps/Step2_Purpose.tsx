@@ -15,16 +15,16 @@ export default function Step2_Purpose({ setValue, watch, errors }: StepProps) {
   const targetAudience = watch('targetAudience') || '';
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div>
-        <h2 className="font-display text-2xl mb-2">What should your website do?</h2>
-        <p className="text-sm text-text-secondary mb-5">
+        <h2 className="font-display text-xl sm:text-2xl mb-2 font-bold">What should your website do?</h2>
+        <p className="text-xs sm:text-sm text-text-secondary mb-4 sm:mb-5 leading-relaxed">
           Select all the goals that apply.
         </p>
       </div>
 
       <div>
-        <label className="block text-sm font-body text-text-secondary mb-3">
+        <label className="block text-xs sm:text-sm font-body font-semibold text-text-secondary mb-3 uppercase tracking-wide">
           Website goals
         </label>
         <ExpandableChipGroup
@@ -45,7 +45,7 @@ export default function Step2_Purpose({ setValue, watch, errors }: StepProps) {
       </div>
 
       <div>
-        <label className="block text-sm font-body text-text-secondary mb-3">
+        <label className="block text-xs sm:text-sm font-body font-semibold text-text-secondary mb-3 uppercase tracking-wide">
           Who is your target audience?
         </label>
         <ExpandableChipGroup

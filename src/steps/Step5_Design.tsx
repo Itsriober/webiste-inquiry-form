@@ -30,16 +30,16 @@ export default function Step5_Design({ setValue, watch, register, errors }: Step
   const designStyle = watch('designStyle') || '';
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div>
-        <h2 className="font-display text-2xl mb-2">Design preferences</h2>
-        <p className="text-sm text-text-secondary mb-5">
+        <h2 className="font-display text-xl sm:text-2xl mb-2 font-bold">Design preferences</h2>
+        <p className="text-xs sm:text-sm text-text-secondary mb-4 sm:mb-5 leading-relaxed">
           Help us understand your visual direction.
         </p>
       </div>
 
       <div>
-        <label className="block text-sm font-body text-text-secondary mb-3">
+        <label className="block text-xs sm:text-sm font-body font-semibold text-text-secondary mb-3 uppercase tracking-wide">
           Current brand status
         </label>
         <RadioChipGroup
@@ -56,7 +56,7 @@ export default function Step5_Design({ setValue, watch, register, errors }: Step
       </div>
 
       <div>
-        <label className="block text-sm font-body text-text-secondary mb-3">
+        <label className="block text-xs sm:text-sm font-body font-semibold text-text-secondary mb-3 uppercase tracking-wide">
           Preferred style
         </label>
         <RadioChipGroup

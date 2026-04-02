@@ -47,7 +47,7 @@ export default function ChipGroup({
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 sm:gap-3">
         {options.map((option) => (
           <Chip
             key={option}

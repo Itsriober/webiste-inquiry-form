@@ -1,0 +1,73 @@
+import { VercelRequest, VercelResponse } from '@vercel/node';
+import { del, get } from '@vercel/blob';
+
+async function getStats() {
+  try {
+    const response = await get('stats.json', { access: 'public' });
+    if (!response) {
+      return { started: 0, submitted: 0, abandoned: 0 };
+    }
+    // Read from the ReadableStream
+    const reader = response.stream!.getReader();
+    const chunks: Uint8Array[] = [];
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+    }
+    const buffer = Buffer.concat(chunks);
+    const text = buffer.toString('utf-8');
+    return JSON.parse(text);
+  } catch {
+    return { started: 0, submitted: 0, abandoned: 0 };
+  }
+}
+
+async function saveStats(stats: any) {
+  const { put } = await import('@vercel/blob');
+  await put('stats.json', JSON.stringify(stats), {
+    contentType: 'application/json',
+    access: 'public',
+  });
+}
+
+export default async function handler(
+  req: VercelRequest,
+  res: VercelResponse
+) {
+  if (req.method !== 'DELETE') {
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+
+  try {
+    const pin = (req.query.pin as string) || req.headers['x-dashboard-pin'];
+    const correctPin = process.env.DASHBOARD_PIN_SECRET;
+
+    if (!pin || pin !== correctPin) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { briefId } = req.query;
+
+    if (!briefId || typeof briefId !== 'string') {
+      res.status(400).json({ error: 'briefId is required' });
+      return;
+    }
+
+    // Delete the brief file
+    await del(`briefs/${briefId}.json`);
+
+    res.status(200).json({
+      success: true,
+      message: 'Brief deleted successfully',
+    });
+  } catch (error) {
+    console.error('Error deleting brief:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to delete brief',
+    });
+  }
+}

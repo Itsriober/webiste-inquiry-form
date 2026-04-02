@@ -15,16 +15,16 @@ export default function Step4_Features({ setValue, watch, errors }: StepProps) {
   const needsCMS = watch('needsCMS') || '';
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div>
-        <h2 className="font-display text-2xl mb-2">Features you need</h2>
-        <p className="text-sm text-text-secondary mb-5">
+        <h2 className="font-display text-xl sm:text-2xl mb-2 font-bold">Features you need</h2>
+        <p className="text-xs sm:text-sm text-text-secondary mb-4 sm:mb-5 leading-relaxed">
           Select all the features your website should have.
         </p>
       </div>
 
       <div>
-        <label className="block text-sm font-body text-text-secondary mb-3">
+        <label className="block text-xs sm:text-sm font-body font-semibold text-text-secondary mb-3 uppercase tracking-wide">
           Features
         </label>
         <ExpandableChipGroup
@@ -46,7 +46,7 @@ export default function Step4_Features({ setValue, watch, errors }: StepProps) {
       </div>
 
       <div>
-        <label className="block text-sm font-body text-text-secondary mb-3">
+        <label className="block text-xs sm:text-sm font-body font-semibold text-text-secondary mb-3 uppercase tracking-wide">
           Do you need a content management system (CMS)?
         </label>
         <ExpandableChipGroup
