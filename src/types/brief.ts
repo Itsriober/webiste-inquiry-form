@@ -3,6 +3,7 @@ export interface BriefFormData {
   businessType: string;
   businessTypeOther?: string;
   hasExistingSite: string;
+  currentUrl?: string;
 
   // Step 2 — Website Purpose
   websitePurpose: string[];
