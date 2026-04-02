@@ -36,6 +36,16 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
+  // Check environment
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    console.error('BLOB_READ_WRITE_TOKEN not configured');
+    res.status(503).json({
+      success: false,
+      error: 'Service temporarily unavailable. Storage not configured.',
+    });
+    return;
+  }
+
   if (req.method !== 'DELETE') {
     res.status(405).json({ error: 'Method not allowed' });
     return;

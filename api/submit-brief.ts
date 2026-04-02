@@ -51,6 +51,16 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
+  // Check environment
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    console.error('BLOB_READ_WRITE_TOKEN not configured');
+    res.status(503).json({
+      success: false,
+      error: 'Service temporarily unavailable. Storage not configured.',
+    });
+    return;
+  }
+
   // Only allow POST requests
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
@@ -91,23 +101,28 @@ export default async function handler(
     });
     return;
   } catch (error) {
-    console.error('Error submitting brief:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Error submitting brief:', errorMessage, error);
 
-    if (error instanceof Error) {
-      // Zod validation errors
-      if (error.message.includes('Parse error') || error.message.includes('Invalid')) {
-        res.status(400).json({
-          success: false,
-          error: 'Invalid form data. Please check all required fields.',
-          details: error.message,
-        });
-        return;
-      }
+    // Zod validation errors
+    if (errorMessage.includes('Parse error') || errorMessage.includes('Invalid')) {
+      res.status(400).json({
+        success: false,
+        error: 'Invalid form data. Please check all required fields.',
+        details: errorMessage,
+      });
+      return;
+    }
+
+    // Blob Storage errors
+    if (errorMessage.includes('BLOB') || errorMessage.includes('blob')) {
+      console.error('Blob Storage error - token might be missing:', errorMessage);
     }
 
     res.status(500).json({
       success: false,
       error: 'Failed to submit brief. Please try again later.',
+      debug: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
     });
   }
 }
