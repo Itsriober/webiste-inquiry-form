@@ -2,8 +2,14 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import { briefFormSchema, type BriefFormSchema } from '../src/lib/formSchema';
 import crypto from 'crypto';
 
-// Fallback in-memory storage for development/testing
-const inMemoryBriefs: Map<string, any> = new Map();
+// Try to import blob, but fallback if not available
+let blobModule: any = null;
+try {
+  // This will work if token is configured
+  blobModule = require('@vercel/blob');
+} catch (e) {
+  // Fallback for when blob isn't configured
+}
 
 export interface StoredBrief {
   id: string;
@@ -19,11 +25,10 @@ export interface FormStats {
 }
 
 async function getStats(): Promise<FormStats> {
-  // If Blob token exists, use it
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
+  // If Blob module is available, use it
+  if (blobModule?.get) {
     try {
-      const { get } = await import('@vercel/blob');
-      const response = await get('stats.json', { access: 'public' });
+      const response = await blobModule.get('stats.json', { access: 'public' });
       if (response) {
         const reader = response.stream!.getReader();
         const chunks: Uint8Array[] = [];
@@ -45,11 +50,9 @@ async function getStats(): Promise<FormStats> {
 }
 
 async function saveStats(stats: FormStats): Promise<void> {
-  // If Blob token exists, use it
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
+  if (blobModule?.put) {
     try {
-      const { put } = await import('@vercel/blob');
-      await put('stats.json', JSON.stringify(stats), {
+      await blobModule.put('stats.json', JSON.stringify(stats), {
         contentType: 'application/json',
         access: 'public',
       });
@@ -60,11 +63,9 @@ async function saveStats(stats: FormStats): Promise<void> {
 }
 
 async function saveBrief(brief: StoredBrief): Promise<void> {
-  // If Blob token exists, use it
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
+  if (blobModule?.put) {
     try {
-      const { put } = await import('@vercel/blob');
-      await put(`briefs/${brief.id}.json`, JSON.stringify(brief), {
+      await blobModule.put(`briefs/${brief.id}.json`, JSON.stringify(brief), {
         contentType: 'application/json',
         access: 'public',
       });
@@ -72,8 +73,6 @@ async function saveBrief(brief: StoredBrief): Promise<void> {
       console.warn('Blob storage error saving brief:', error);
     }
   }
-  // Fallback: in-memory storage
-  inMemoryBriefs.set(brief.id, brief);
 }
 
 export default async function handler(
