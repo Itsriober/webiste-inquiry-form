@@ -312,7 +312,7 @@ export default function Dashboard() {
               <div className="space-y-12">
                 <DetailSection title="Executive Summary & Requirements">
                   <DetailRow label="Business Ecosystem" value={selectedBrief.data.businessType === 'Other' ? `Other: ${selectedBrief.data.businessTypeOther}` : selectedBrief.data.businessType} />
-                  <DetailRow label="Infrastructure Status" value={selectedBrief.data.hasExistingSite === 'Yes' ? `Legacy Site: ${selectedBrief.data.currentUrl}` : 'New Build'} />
+                  <DetailRow label="Infrastructure Status" value={selectedBrief.data.hasExistingSite === 'Yes' ? (selectedBrief.data.currentUrl ? `Legacy Site: ${selectedBrief.data.currentUrl}` : 'Existing Site') : 'New Build'} />
                   <DetailRow label="Core Objectives" value={selectedBrief.data.websitePurpose.join(', ')} />
                   <DetailRow label="Demographic Target" value={selectedBrief.data.targetAudience} />
                 </DetailSection>
